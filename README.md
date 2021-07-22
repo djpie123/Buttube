@@ -62,6 +62,12 @@ if(command === "setup" || command === "leave"){
      client.buttube.setup(message);
     }
 ```
-
-#That's it enjoy
+>### volume command
+```js
+if(command === "volume" || command === "vol"){
+         
+        client.buttube.play(message, percentage);
+    }
+```
+##That's it enjoy
 

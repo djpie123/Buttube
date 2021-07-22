@@ -55,6 +55,12 @@ class buttube {
         this.distube.play(message, music)
         message.delete()
     }
+    async volume(message, percent){
+      this.distube.setVolume(message, percent)
+      message.delete()
+      message.channel.send(`Volume is now set to ${percent}%`).then(m => m.delete({ timeout: 5000 })
+  )
+  }
 async events(message){
   const msgId = await this.db.get(`${message.guild.id}`)
   const msg = await message.channel.messages.fetch(msgId)
