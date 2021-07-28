@@ -12,7 +12,8 @@
     "discord.js": "^12.5.3",
     "distube": "^2.8.15",
     "ffmpeg-static": "^4.3.0",
-    "quickmongo": "^3.0.2"
+    "quickmongo": "^3.0.2",
+    "ytdl-core": "^4.9.0"
   },
   "repository": {
     "type": "git",

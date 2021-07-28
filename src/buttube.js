@@ -1,5 +1,5 @@
 const DisTube = require('distube')
-const { MessageButton, MessageActionRow } = require('discord-buttons'); 
+const { MessageButton, MessageActionRow, MessageMenuOption, MessageMenu } = require('discord-buttons'); 
 const {MessageEmbed} = require("discord.js")
 const { Database } = require("quickmongo");
 class buttube {
@@ -44,10 +44,16 @@ class buttube {
       .addComponent(resume)
       .addComponent(skip)
       .addComponent(que);
+      const volume = new MessageButton()
+      .setLabel('Set Volume')
+      .setStyle('grey')
+      .setID('volume')
+      const row2 = new MessageActionRow()
+      .addComponent(volume)
  const musicem = new MessageEmbed()
 .setTitle('Not Playing')
  .setImage(`https://i.imgur.com/msgNNqN.gif`)
-        this.msg = await  message.channel.send(musicem, row)
+        this.msg = await  message.channel.send({embed:musicem,components:[row, row2]})
         this.db.set(`${message.guild.id}`, `${this.msg.id}`)
     }
     async play(message, music){
@@ -55,12 +61,12 @@ class buttube {
         this.distube.play(message, music)
         message.delete()
     }
-    async volume(message, percent){
-      this.distube.setVolume(message, percent)
-      message.delete()
-      message.channel.send(`Volume is now set to ${percent}%`).then(m => m.delete({ timeout: 5000 })
-  )
-  }
+     async volume(message, percent){
+        this.distube.setVolume(message, percent)
+        message.delete()
+        message.channel.send(`Volume is now set to ${percent}%`).then(m => m.delete({ timeout: 5000 })
+    )
+    }
 async events(message){
   const msgId = await this.db.get(`${message.guild.id}`)
   const msg = await message.channel.messages.fetch(msgId)
@@ -106,7 +112,28 @@ async button(button){
   }else if(button.id == 'skip'){
     this.distube.skip(message)
     button.reply.send('Skipped', true)
-}
-}
-}
+}else if(button.id == 'volume'){
+  button.reply.send('Please send the amount of volume in percentage (eg- 10)', true)
+ const filter = m => m.author.id == button.clicker.id
+ const collector = await button.channel.createMessageCollector(filter, { time: 30000 })
+ collector.on('collect', async (msg) => {
+   msg.delete()
+   if (!msg.content){
+     return collector.stop('error');
+     }else if(isNaN(msg.content)){
+       return collector.stop('num');
+     }else{
+       this.distube.setVolume(message, msg.content)
+       button.reply.edit(`volume is now set to ${msg.content}%`, true)
+       collector.stop('done')
+     }
+ })
+ collector.on('end', async (msgs, reason) => {
+   if(reason == 'error') return button.reply.edit('Please send something', true);
+   if(reason == 'num') return button.reply.edit('Please send a number', true);
+   if(reason == 'time') return button.reply.edit('You did not reply on time');
+})
+    }
+}}
+
 module.exports =  buttube;
