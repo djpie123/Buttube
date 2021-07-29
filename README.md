@@ -29,7 +29,7 @@ yarn add buttube
  ```
 
 ## get started
-Here is how to get startes
+Here is how to get started
 ```js
 const {buttube} = require('buttube')
 const client = new Discord.Client();
@@ -62,12 +62,6 @@ if(command === "setup" || command === "leave"){
      client.buttube.setup(message);
     }
 ```
->### volume command
-```js
-if(command === "volume" || command === "vol"){
-         
-        client.buttube.play(message, percentage);
-    }
-```
-##That's it enjoy
+>
+#That's it enjoy
 
