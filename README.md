@@ -30,6 +30,8 @@ yarn add buttube
 
 ## get started
 Here is how to get started
+# First you need to decide whether you will use a local file database or quick-mongo
+Below is the line for Quic mongo
 ```js
 const {buttube} = require('buttube')
 const client = new Discord.Client();
@@ -40,6 +42,17 @@ client.buttube = new buttube(client, "mongodb url")
 > ### params
 client - Discord.client
 mongodb url - mongodb connection url
+## OR
+Below is for Local file database
+```js
+const {quickbuttube} = require('buttube')
+const client = new Discord.Client();
+//necessary to be at this place only
+require('discord-buttons')(client)
+client.buttube = new quickbuttube(client)
+```
+> ### params
+client - Discord.client
 > ### another step 
 ```js
 //add this event
@@ -63,5 +76,5 @@ if(command === "setup" || command === "leave"){
     }
 ```
 >
-#That's it enjoy
+# That's it enjoy
 

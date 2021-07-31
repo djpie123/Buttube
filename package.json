@@ -1,6 +1,6 @@
 {
   "name": "buttube",
-  "version": "0.1.6",
+  "version": "0.3.2",
   "description": "A music package with buttons",
   "main": "index.js",
   "scripts": {
