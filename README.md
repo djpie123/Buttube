@@ -39,11 +39,13 @@ Intents = Discord.Intents;
 //GUILD_VOICE_STATES intent is required
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const {buttube} = require('buttube')
-client.buttube = new buttube(client, "mongodb url")
+client.buttube = new buttube(client, "mongodb url", footer, imageUrl)
 ```
 > ### params
-client - Discord.client
-mongodb url - mongodb connection url
+client - Discord.client </br>
+mongodb url - mongodb connection url </br>
+footer - footer for embed  </br>
+image url - image url for embed </br>
 ## OR
 Below is for Local file database
 ```js
@@ -56,9 +58,9 @@ const {quickbuttube} = require('buttube')
 client.buttube = new quickbuttube(client, footer, imageUrl)
 ```
 > ### params
-client - Discord.client
-footer - footer for embed 
-image url - image url for embed
+client - Discord.client </br>
+footer - footer for embed  </br>
+image url - image url for embed </br>
 > ### another step 
 ```js
 //add this event

@@ -6,7 +6,7 @@ class quickbuttube {
      * @param {Discord.Client} client - A discord.js client.
      */
 
-    constructor(client, footer, imageURL) {
+    constructor(client, footer = '', imageURL = '') {
 
         if (!client) throw new Error("A client wasn't provided.");
         this.client = client;

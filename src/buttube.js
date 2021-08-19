@@ -7,7 +7,7 @@ class buttube {
      * @param {Discord.Client} client - A discord.js client.
      */
 
-    constructor(client, url = '', footer, imageURL) {
+    constructor(client, url = '', footer = '', imageURL = '') {
 
         if (!client) throw new Error("A client wasn't provided.");
         if (!url) throw new Error("Please provide a mongodb connection url")
