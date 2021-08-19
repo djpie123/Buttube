@@ -33,10 +33,12 @@ Here is how to get started
 # First you need to decide whether you will use a local file database or quick-mongo
 Below is the line for Quic mongo
 ```js
+const Discord = require('discord.js');
+Client = Discord.Client;
+Intents = Discord.Intents;
+//GUILD_VOICE_STATES intent is required
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const {buttube} = require('buttube')
-const client = new Discord.Client();
-//necessary to be at this place only
-require('discord-buttons')(client)
 client.buttube = new buttube(client, "mongodb url")
 ```
 > ### params
@@ -45,20 +47,30 @@ mongodb url - mongodb connection url
 ## OR
 Below is for Local file database
 ```js
+const Discord = require('discord.js');
+Client = Discord.Client;
+Intents = Discord.Intents;
+//GUILD_VOICE_STATES intent is required
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const {quickbuttube} = require('buttube')
-const client = new Discord.Client();
-//necessary to be at this place only
-require('discord-buttons')(client)
-client.buttube = new quickbuttube(client)
+client.buttube = new quickbuttube(client, footer, imageUrl)
 ```
 > ### params
 client - Discord.client
+footer - footer for embed 
+image url - image url for embed
 > ### another step 
 ```js
 //add this event
-client.on("clickButton", async(button) => {
-client.buttube.button(button)
+client.on('interactionCreate', async(interaction) => {
+    if (!interaction.isButton()) return;
+    client.buttube.interaction(interaction)
 })
+```
+> ### another step
+add this line in Your code anywhere
+```js
+client.buttube.events()
 ```
 # how to use
 here is how to create commands
@@ -67,6 +79,7 @@ here is how to create commands
 if(command === "play" || command === "p"){
          
         client.buttube.play(message, args.join(" "));
+        //For playing your playlist the args.join(" ") should be equal to "my list". Eg: ?p my list.
     }
 ```
 >### to make setup command
@@ -75,5 +88,18 @@ if(command === "setup" || command === "leave"){
      client.buttube.setup(message);
     }
 ```
->
+>### Creating Playlist Command
+```js
+if(command === "addlist" || command === "a"){
+         
+        client.buttube.addSongToPlaylist(message, args.join(" "), apikey);
+    }
+```
+>### Deleting a playlist
+```js
+if(command === "clearList" || command === "c"){
+         
+        client.buttube.clearList(message);
+    }
+```
 # That's it enjoy
