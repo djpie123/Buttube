@@ -1,6 +1,6 @@
 {
   "name": "buttube",
-  "version": "0.4.4",
+  "version": "0.4.8",
   "description": "A music package with buttons",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "discord.js": "^13.0.1",
-    "distube": "^3.0.0-beta.35",
+    "distube": "^3.0.0-beta.38",
     "ffmpeg-static": "^4.4.0",
     "quickmongo": "^3.0.2",
     "ytdl-core": "^4.9.1"

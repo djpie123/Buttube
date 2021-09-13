@@ -39,13 +39,13 @@ Intents = Discord.Intents;
 //GUILD_VOICE_STATES intent is required
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const {buttube} = require('buttube')
-client.buttube = new buttube(client, "mongodb url", footer, imageUrl)
+client.buttube = new buttube(client, "mongodb url", embed, api)
 ```
 > ### params
 client - Discord.client </br>
 mongodb url - mongodb connection url </br>
-footer - footer for embed  </br>
-image url - image url for embed </br>
+embed - The setup embed  </br>
+api - the youtube api key used for add song to playlist function(now is shifted to this place)
 ## OR
 Below is for Local file database
 ```js
@@ -55,12 +55,12 @@ Intents = Discord.Intents;
 //GUILD_VOICE_STATES intent is required
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] });
 const {quickbuttube} = require('buttube')
-client.buttube = new quickbuttube(client, footer, imageUrl)
+client.buttube = new quickbuttube(client, embed, api)
 ```
 > ### params
 client - Discord.client </br>
-footer - footer for embed  </br>
-image url - image url for embed </br>
+embed - The setup embed  </br>
+api - the youtube api key used for add song to playlist function(now is shifted to this place)
 > ### another step 
 ```js
 //add this event
@@ -70,9 +70,24 @@ client.on('interactionCreate', async(interaction) => {
 })
 ```
 > ### another step
-add this line in Your code anywhere
+Here you can set the embed details.
+eg:-
 ```js
-client.buttube.events()
+//I have not added image as the image has to be the song thumnail
+//you can only set title, footer and dexcription for now.
+const playembed = {
+    title: 'Now playing: -song.name-',
+    footer: "Song's duration: -song.duration-",
+    description: 'Some description' 
+}
+//-song.name- : this is the name of the song
+//-song.url- : this is the song url
+//-song.duration- : this is the song duration
+//-song.user- : the user who requested the song
+```
+add the following line in Your code anywhere:-
+```js
+client.buttube.events(playembed)
 ```
 # how to use
 here is how to create commands
@@ -94,7 +109,7 @@ if(command === "setup" || command === "leave"){
 ```js
 if(command === "addlist" || command === "a"){
          
-        client.buttube.addSongToPlaylist(message, args.join(" "), apikey);
+        client.buttube.addSongToPlaylist(message, args.join(" "));
     }
 ```
 >### Deleting a playlist
@@ -104,4 +119,20 @@ if(command === "clearList" || command === "c"){
         client.buttube.clearList(message);
     }
 ```
+### Slash Commands
+added slash commands
+```js
+//set listEnabled to true if you have provided an api key else set it to false
+//if listEnabled is true then please fill addList and clear command's name
+client.buttube.slashCmd(client, 'client_id', {
+    listEnabled: true/false, 
+    playCmd: 'play command name',
+    setupCmd: 'setup command name',
+    addList: 'add song to playlist command name',
+    songName: 'the option name which is added to the slash command',
+    clear: 'clear command name'
+    })        
+```
+addlist function will not work witout api key 
+addlist slashcommand is off by default to turn it on just set the above to true and provide the youtube api key
 # That's it enjoy

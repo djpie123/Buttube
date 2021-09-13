@@ -1,19 +1,23 @@
 const {DisTube} = require('distube')
 const {MessageEmbed, MessageButton, MessageActionRow} = require("discord.js")
+const { YTSearcher } = require('ytsearcher');
 class quickbuttube {
     /**
      * 
      * @param {Discord.Client} client - A discord.js client.
      */
 
-    constructor(client, footer = '', imageURL = '') {
+    constructor(client, musicem, api = '') {
 
         if (!client) throw new Error("A client wasn't provided.");
         this.client = client;
-        if(!footer) footer =  "";
-        this.footer = footer
-        if(!imageURL) imageURL = 'https://i.imgur.com/msgNNqN.gif'
-        this.imageURL = imageURL
+        this.musicem = musicem
+        if(!musicem){
+            musicem = new MessageEmbed()
+            .setTitle('Not Playing')
+            .setImage('https://i.imgur.com/msgNNqN.gif')
+        }
+        if(api) this.searcher = new YTSearcher(api);
         this.distube = new DisTube(client, { searchSongs: 1, emitNewSongOnly: true, leaveOnFinish: true, emitAddSongWhenCreatingQueue: false, emitAddListWhenCreatingQueue: false });
         const quickdb = require('./db/index.js');
         this.db = quickdb()
@@ -22,17 +26,8 @@ class quickbuttube {
         
     async setup(message){
       message.delete()
-const musicem = {
-title: 'Not Playing',
-image: {
- url: this.imageURL,
-},
-footer: {
-  text: this.footer,
-  },
-};
       this.msg = await  message.channel.send({
-        embeds:[musicem],
+        embeds:[this.musicem],
         components:[]
       })
       this.db.set(`${message.guild.id}`, `${this.msg.id}`)
@@ -52,10 +47,8 @@ footer: {
       message.channel.send(`Volume is now set to ${percent}%`).then(m => m.delete({ timeout: 5000 })
   )
   }
-  async addSongToPlaylist(message, song, key){
-    const { YTSearcher } = require('ytsearcher');
-    const searcher = new YTSearcher(key);
-    let result = await searcher.search(`${song}`, { type: 'video' });
+  async addSongToPlaylist(message, song){
+    let result = await this.searcher.search(`${song}`, { type: 'video' });
     const url = result.first.url
     message.delete()
      this.db.push(`playlist_${message.author.id}`, `${url}`)
@@ -66,52 +59,72 @@ footer: {
     this.db.delete(`playlist_${message.author.id}`)
     message.channel.send({content: `Cleared all songs from your play list`, }).then(m => m.delete({ timeout: 300000 }))    
     }
-  async events(){
-    this.distube
-     .on("playSong", async (queue, song) =>{
-        const msgId = await this.db.get(`${queue.textChannel.guild.id}`)
-        const msg = await queue.textChannel.messages.fetch(msgId)
-        const row = new MessageActionRow()
-        .addComponents(
-    new MessageButton()
-        .setLabel('stop')
-        .setStyle('DANGER')
-        .setCustomId('stop'),
-       new MessageButton()
-        .setLabel('pause')
-        .setStyle('PRIMARY')
-        .setCustomId('pause'),
-        new MessageButton()
-        .setLabel('resume')
-        .setStyle('SUCCESS')
-        .setCustomId('resume'),
-        new MessageButton()
-        .setLabel('skip')
-        .setStyle('SECONDARY')
-        .setCustomId('skip'),
-        new MessageButton()
-        .setLabel('Get que')
-        .setStyle('PRIMARY')
-        .setCustomId('que'))
-        const row2 = new MessageActionRow()
-        .addComponents(  
-        new MessageButton()
-        .setLabel('Set Volume')
-        .setStyle('SECONDARY')
-        .setCustomId('volume'),
-        new MessageButton()
-        .setLabel('Set Filter')
-        .setStyle('SECONDARY')
-        .setCustomId('filter'))
-      const embed1 = {
-        title: `Now Playing: ${song.name}`,
-        image: {
-          url: `${song.thumbnail}`,
-        },
-        footer: {
-          text: this.footer,
-          },
-        };
+    async events(playembed){
+      this.distube
+       .on("playSong", async (queue, song) =>{
+          const msgId = await this.db.get(`${queue.textChannel.guild.id}`)
+          const msg = await queue.textChannel.messages.fetch(msgId)
+          const row = new MessageActionRow()
+          .addComponents(
+      new MessageButton()
+          .setLabel('stop')
+          .setStyle('DANGER')
+          .setCustomId('stop')
+          .setEmoji('⏺️'),
+         new MessageButton()
+          .setLabel('pause')
+          .setStyle('PRIMARY')
+          .setCustomId('pause')
+        .setEmoji('⏸️'),
+          new MessageButton()
+          .setLabel('resume')
+          .setStyle('SUCCESS')
+          .setCustomId('resume')
+  .setEmoji('▶️'),
+          new MessageButton()
+          .setLabel('skip')
+          .setStyle('SECONDARY')
+          .setCustomId('skip')
+  .setEmoji('⏭'),
+          new MessageButton()
+          .setLabel('Get que')
+          .setStyle('PRIMARY')
+          .setCustomId('que')
+  .setEmoji('🎛️'))
+          const row2 = new MessageActionRow()
+          .addComponents(  
+          new MessageButton()
+          .setLabel('Set Volume')
+          .setStyle('SECONDARY')
+          .setCustomId('volume')
+  .setEmoji('🔈'),
+          new MessageButton()
+          .setLabel('Set Filter')
+          .setStyle('SECONDARY')
+          .setCustomId('filter')
+  .setEmoji('🎚️'))
+       if(!playembed){
+        playembed = {
+          title: `Now Playing: -song.name-`,
+          };
+       }
+       const embed1 = new Discord.MessageEmbed()
+       .setImage(song.thumbnail)
+       if(playembed.title) embed1.setTitle(playembed.title
+        .replace("-song.name-", `${song.name}`)
+       .replace("-song.url-", `${song.url}`)
+       .replace("-song.duration-", `${song.formattedDuration}`)
+       .replace("-song.user-", `${song.user}`));
+       if(playembed.description) embed1.setDescription(playembed.description
+       .replace("-song.name-", `${song.name}`)
+       .replace("-song.url-", `${song.url}`)
+       .replace("-song.duration-", `${song.formattedDuration}`)
+       .replace("-song.user-", `${song.user}`));
+       if(playembed.footer) embed1.setFooter(playembed.footer
+        .replace("-song.name-", `${song.name}`)
+        .replace("-song.url-", `${song.url}`)
+        .replace("-song.duration-", `${song.formattedDuration}`)
+        .replace("-song.user-", `${song.user}`));
       msg.edit({embeds:[embed1], components:[row, row2]})
         })
       .on("addSong", (queue, song) => {
@@ -123,45 +136,19 @@ footer: {
     .on("empty", async queue =>{
       const msgId = await this.db.get(`${queue.textChannel.guild.id}`)
              const msg = await queue.textChannel.messages.fetch(msgId)
-               const embed = {
-                 title: 'Not Playing',
-       image: {
-         url: this.imageURL,
-       },
-       footer: {
-         text: this.footer,
-         },
-       };
-             msg.edit({embeds:[embed], components:[]})
+             msg.edit({embeds:[this.musicem], components:[]})
      })
       .on("finish", async (queue) =>{
         const msgId = await this.db.get(`${queue.textChannel.guild.id}`)
         const msg = await queue.textChannel.messages.fetch(msgId)
-          const embed = {
-            title: 'Not Playing',
-            image: {
-              url: this.imageURL,
-            },
-            footer: {
-              text: this.footer,
-              },
-            };
-        msg.edit({embeds:[embed], components:[]})
+        msg.edit({embeds:[this.musicem], components:[]})
         });
     }
 async interaction(button){
 const filters = ["3d","bassboost","echo","karaoke","nightcore","vaporwave","flanger", "none"]
 const msgId = await this.db.get(`${button.guildId}`)
 const msg = await button.channel.messages.fetch(msgId)
-const embed = {
-  title: 'Not Playing',
-  image: {
-    url: this.imageURL,
-  },
-  footer: {
-    text: this.footer,
-    },
-  };
+const embed = this.musicem
 const message = button.message;
 if(button.customId == 'stop'){
   this.distube.stop(message)
@@ -226,6 +213,32 @@ collector.on('end', async (msgs, reason) => {
   })
       }
 }
+async slashCmd(client, client_id = '', options){
+  client.on('interactionCreate', async interaction => {
+  const message = interaction.message
+  const slcmd = interaction.commandName
+    if(slcmd == options.setupCmd){
+  interaction.reply("Sen't the setup embed")
+  const msg = await interaction.channel.send({embeds: [this.musicem]})
+  this.db.set(interaction.guild.id, msg.id)
+  }else if(slcmd == options.playCmd){
+  const music = interaction.options.get(options.songName).value;
+  this.distube.playVoiceChannel(interaction.member.voice.channel, music, { member: interaction.member, textChannel: interaction.channel })
+  interaction.reply({ content: 'Done', ephemeral: true });
 }
-
+if(options.listEnabled == true){
+if(slcmd == options.addList){
+   const music = interaction.options.get(options.songName).value
+  let result = await this.searcher.search(`${music}`, { type: 'video' });
+  const url = result.first.url
+   this.db.push(`playlist_${interaction.member.id}`, `${url}`)
+  interaction.reply({content: `Added ${url} to your playlist`, ephemeral: true})
+  }else if(slcmd == options.clear){
+  this.db.delete(`playlist_${interaction.member.id}`)
+  interaction.reply({content: `Cleared all songs from your play list`, ephemeral: true})
+  }
+}
+  })
+  }
+}
 module.exports =  quickbuttube;
