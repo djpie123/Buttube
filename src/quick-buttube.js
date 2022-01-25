@@ -34,11 +34,20 @@ class quickbuttube {
   }
   async play(message, music){
     if(music.toLocaleLowerCase() == 'my list'){
-    let list = await this.db.get(`playlist_${message.author.id}`)
-    this.distube.playCustomPlaylist(message, list, { name: `${message.author.id}` })
-    }else{
-          this.distube.play(message, music)
-    }
+      let list = await this.db.get(`playlist_${message.author.id}`)
+      const user_playlist = await this.distube.createCustomPlaylist(list, {
+      member: message.member, 
+      properties: { name: `playlist_${message.author.id}` }, 
+      parallel: true
+      });
+      this.distube.play(message.member.voice?.channel, user_playlist, {
+      member: message.member, 
+      textChannel: message.channel, 
+      message
+      });
+      }else{
+            this.distube.play(message.member.voice?.channel, music, {member: message.member, textChannel: message.channel, message})
+      }
     message.delete()
       }
    async volume(message, percent){
@@ -222,9 +231,19 @@ async slashCmd(client, client_id = '', options){
   const msg = await interaction.channel.send({embeds: [this.musicem]})
   this.db.set(interaction.guild.id, msg.id)
   }else if(slcmd == options.playCmd){
-  const music = interaction.options.get(options.songName).value;
-  this.distube.playVoiceChannel(interaction.member.voice.channel, music, { member: interaction.member, textChannel: interaction.channel })
-  interaction.reply({ content: 'Done', ephemeral: true });
+    const music = interaction.options.get('song_name').value;
+    if(music.toLocaleLowerCase() == 'my list'){
+    let list = await this.db.get(`playlist_${interaction.member.id}`)
+    const user_playlist = await this.distube.createCustomPlaylist(list, {
+    member: interaction.member, 
+    properties: { name: `playlist_${interaction.member.id}` }, 
+    parallel: true
+    });
+    this.distube.playVoiceChannel(interaction.member.voice.channel, user_playlist, { member: interaction.member, textChannel: interaction.channel })
+    }else{
+    this.distube.playVoiceChannel(interaction.member.voice.channel, music, { member: interaction.member, textChannel: interaction.channel })
+    }
+    interaction.reply({ content: 'Done', ephemeral: true });
 }
 if(options.listEnabled == true){
 if(slcmd == options.addList){
